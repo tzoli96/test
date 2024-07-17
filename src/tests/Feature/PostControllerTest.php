@@ -15,7 +15,7 @@ class PostControllerTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->postJson('/api/posts', [
-            'id' => $user->id,
+            'user_id' => $user->id,
             'title' => 'Test Post',
             'body' => 'This is a test post.',
         ]);
