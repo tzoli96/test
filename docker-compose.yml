@@ -1,0 +1,75 @@
+version: '3.8'
+
+networks:
+  laravel:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfiles/nginx.dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    ports:
+      - "80:80"
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - php
+    networks:
+      - laravel
+
+  php:
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - ./src:/var/www/html:delegated
+    networks:
+      - laravel
+
+  composer:
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - php
+    entrypoint: ['composer', 'install', '--ignore-platform-reqs']
+    networks:
+      - laravel
+
+  artisan:
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      composer:
+        condition: service_started
+      app:
+        condition: service_started
+    entrypoint: ['sh', '/usr/local/bin/docker-entrypoint.sh']
+    networks:
+      - laravel
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "1010:8080"
+    networks:
+      - laravel
+
