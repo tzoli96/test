@@ -63,7 +63,7 @@ services:
         condition: service_started
     entrypoint: ['sh', '/usr/local/bin/docker-entrypoint.sh']
     networks:
-      - laravel
+      - laravelt
 
   adminer:
     image: adminer
